@@ -1,0 +1,63 @@
+version: "3.8"
+services:
+  poll:
+    build: ./poll
+    image: my_poll:1
+    ports:
+      - "5000:80"
+    depends_on:
+      - redis
+    networks:
+      - poll-tier
+
+  redis:
+    image: "redis:6.0-alpine"
+    ports:
+      - "6379:6379"
+    networks:
+      - poll-tier
+      - back-tier
+
+  worker:
+    build: ./worker
+    image: my_worker:1
+    depends_on:
+      - poll
+      - result
+    networks:
+      - back-tier
+
+  db:
+    image: "postgres"
+    networks:
+      - result-tier
+      - back-tier
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_USER: postgres 
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+      POSTGRES_HOST_AUTH_METHOD: md5
+      POSTGRES_INITDB_ARGS: --auth-host=md5
+    restart: always
+    volumes:
+      - ./data:/var/lib/postgresql/data
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    ports:
+      - "5432:5432"
+
+  result:
+    build: ./result
+    image: my_result:1
+    ports:
+      - "5001:4242"
+    depends_on:
+      - db
+    networks:
+      - result-tier
+
+
+networks:
+  poll-tier:
+  back-tier:
+  result-tier:
