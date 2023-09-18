@@ -1,5 +1,5 @@
 CHANGEMENT
-version: "3.8"
+version: "3.7778"
 services:
   poll:
     build: ./poll
@@ -10,6 +10,7 @@ services:
       - redis
     networks:
       - poll-tier
+      - new-network
 
   redis:
     image: "redis:6.0-alpine"
