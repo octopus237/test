@@ -1,5 +1,5 @@
 CHANGEMENT
-version: "3.7778"
+version: "3.5"
 services:
   poll:
     build: ./poll
